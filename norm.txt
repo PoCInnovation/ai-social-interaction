@@ -1,0 +1,38 @@
+=== COMMUNICATION PROTOCOL ===
+
+== JSON REQUEST FILE ==
+
+{
+    "event": "",
+    "sender": "",
+    "receiver": "",
+    "location": "",
+    "group_to_join: "",
+    "message": "", 
+    "code": 0
+}
+
+== ATTRIBUTES ==
+
+    - Sender: (string) The name of the sender
+
+    - Receiver: (string) The name of the receiver
+
+    - Location: (string) Just a location
+        - Parc
+        - Street
+        - Work
+        - Restaurant
+
+    - Group_to_join: (string) name of somebody whose group you want to join
+
+    - Message: (string) regular message if needed
+
+    - Code: (int) Exit code of the request
+
+    - Event: (string) 
+        - "go_to_location", needs "sender" and "location"
+        - "join_group" needs "sender" and "group_to_join"
+        - speak_in_group needs "sender" and "message"
+        - call_system needs code
+
