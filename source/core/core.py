@@ -4,87 +4,126 @@
 ## File description: core
 ## core
 ##
+import json
 
+INVALID_ACTION = "The action you sent is not valid"
+INVALID_DISCUSSION_GROUP = "The discussion group you sent is invalid"
+INVALID_LOCATION = "The location you sent is invalid"
+INVALID_SENDER = "The sender is invalid or missing"
+MISSING_ARGUMENTS = "The message is missing required arguments"
 ERROR_MESSAGE = "There is one or multiple errors in the message you sent"
 ZONE_ERROR = "There is an error with your current zone"
-PERSON_ERROR = "The person to the one you are trying to talk does not exists or is currently not in your zone"
+PERSON_ERROR = "The person you are trying to talk to does not exist or is currently not in your zone"
 
 def send_message(receiver: str, request: str):
-    pass
+    print(f"receiver: {receiver}\n{request}\n")
 
 class Core:
     def __init__(self) -> None:
         self.places = {
-            "parc" : [],
-            "street" : [],
-            "work" : [],
-            "restaurent" : [],
-            "market" : [],
-            "school" : [],
+            "parc": [],
+            "street": [],
+            "work": [],
+            "restaurant": [],
+            "market": [],
+            "school": []
         }
 
-    def request_is_valid(request: str) -> bool:
-        # Check if the request follow the correct grammar syntax
-        # If the request is a movement check if the place exists and if not return False
-        return True
-
-    def process(self, request: str, sender: str):
+    # Verify if the json file is complete
+    def process(self, request: str):
+        try:
+            data: dict = json.loads(request)
+        except json.JSONDecodeError:
+            print(ERROR_MESSAGE)
+            return
 
         actions_dict = {
-            "move": self.move,
-            "check": self.check,
-            "talk": self.talk,
+            "go_to_location": self.go_to_location,
+            "join_group": self.join_group,
+            "speak_in_group": self.speak_in_group,
         }
 
-        if (not self.request_is_valid(request)):
-            send_message(sender, ERROR_MESSAGE)
+        if not data.get("sender"):
+            print(INVALID_SENDER)
             return
-    
-    # Moving the "sender" to a place
-    def move(self, sender: str, place: str):
-        for p in self.places:
-            if sender in self.places[p]:
-                self.places[p].remove(sender)
-                break
-        self.places[place].append(sender)
-        send_message(sender, f"You moved succesfully to {place}")
 
-    # Check which persons are in the same zone as the sender
-    def check(self, sender: str, request: str):
-        message = "There is the list of the persons that are actually next to you: "
-        sender_place = None
-
-        for p in self.places:
-            if sender in self.places[p]:
-                sender_place = p
-                break
-        if (sender_place == None):
-            send_message(sender, ZONE_ERROR)
+        if data.get("action") not in actions_dict:
+            send_message(data["sender"], INVALID_ACTION)
             return
-        for person in self.places[sender_place]:
-            if (person != sender):
-                message = f"{message}, {person}"
-        send_message(sender, message)
 
-    # Talk to a person that is in the same zone as you
-    def talk(self, sender: str, receiver: str, message):
-        sender_place = None
-
-        for p in self.places:
-            if sender in self.places[p]:
-                sender_place = p
-                break
-        if (sender_place == None):
-            send_message(sender, ZONE_ERROR)
+        if not self.validate_arguments(data):
+            send_message(data["sender"], MISSING_ARGUMENTS)
             return
-        if (not receiver in self.places[sender_place]):
-            send_message(sender, ZONE_ERROR)
-            return
-        send_message(receiver, f"Message of {sender}: {message}")
 
+        action = actions_dict[data["action"]]
+        action(data)
+
+    # Verify if the json file is complete
+    def validate_arguments(self, data: dict) -> bool:
+        action = data.get("action")
+        if action == "go_to_location":
+            return "location" in data
+        elif action == "join_group":
+            return "group_to_join" in data
+        elif action == "speak_in_group":
+            return "message" in data
+        return False
+
+    # Get The current discussion group of the sender
+    def get_current_discussion_group(self, sender: str) -> list:
+        for place in self.places:
+            for discussion_group in self.places[place]:
+                if sender in discussion_group:
+                    return discussion_group
+        return None
+
+    # Remove Sender From his current discussion group
+    def remove_from_current_group(self, sender: str):
+        discussion_group = self.get_current_discussion_group(sender)
+        if discussion_group is not None:
+            discussion_group.remove(sender)
+
+    # Destroy discussion group when nobody is inside
+    def clean_useless_discussion_groups(self):
+        for place in self.places:
+            self.places[place] = [group for group in self.places[place] if group]
+
+    # Send go to an specific location
+    def go_to_location(self, data: dict):
+        self.remove_from_current_group(data["sender"])
+        location = data.get("location")
+        if location in self.places:
+            self.places[location].append([data["sender"]])
+            send_message(data["sender"], f"You moved successfully to {location}")
+        else:
+            send_message(data["sender"], INVALID_LOCATION)
+
+    # Sender join an specific discussion group
+    def join_group(self, data: dict):
+        for place in self.places:
+            for discussion_group in self.places[place]:
+                if data["group_to_join"] in discussion_group:
+                    self.remove_from_current_group(data["sender"])
+                    discussion_group.append(data["sender"])
+                    for neighbor in discussion_group:
+                        send_message(neighbor, f"{data['sender']} joined your discussion group")
+                    send_message(data["sender"], f"You moved successfully to {data['group_to_join']}'s discussion group")
+                    return
+        send_message(data["sender"], INVALID_DISCUSSION_GROUP)
+
+    # Sender speak in his current discussion group
+    def speak_in_group(self, data: dict):
+        discussion_group = self.get_current_discussion_group(data["sender"])
+        if discussion_group is None:
+            send_message(data["sender"], INVALID_DISCUSSION_GROUP)
+            return
+        for neighbor in discussion_group:
+            send_message(neighbor, f"{data['sender']} said: '{data['message']}'")
 
 def main():
     core = Core()
-    core.process("Send:Bonjour mon ami:ANTOINE")
+    with open("test.json", "r") as f:
+        string = f.read()
+    core.process(string)
 
 main()
