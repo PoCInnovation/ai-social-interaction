@@ -1,15 +1,21 @@
 === COMMUNICATION PROTOCOL ===
 
+Here is how threads communicate with the CORE;
+On the other hand CORE simply awnser what threads have to directly send to IA;
+
+example: Henri said: "Hello Jack, How are you"
+         The discussion group you sent is invalid
+
+
 == JSON REQUEST FILE ==
 
 {
-    "event": "",
+    "action": "",
     "sender": "",
     "receiver": "",
     "location": "",
-    "group_to_join: "",
+    "group_to_join": "",
     "message": "", 
-    "code": 0
 }
 
 == ATTRIBUTES ==
@@ -30,9 +36,8 @@
 
     - Code: (int) Exit code of the request
 
-    - Event: (string) 
+    - action: (string) 
         - "go_to_location", needs "sender" and "location"
         - "join_group" needs "sender" and "group_to_join"
         - speak_in_group needs "sender" and "message"
-        - call_system needs code
 
