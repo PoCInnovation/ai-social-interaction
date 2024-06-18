@@ -1,0 +1,8 @@
+{
+    "action": "go_to_location",
+    "sender": "marc",
+    "receiver": "",
+    "location": "parc",
+    "group_to_join": "",
+    "message": "" 
+}
