@@ -4,6 +4,8 @@
 ## File description: core
 ## core
 ##
+
+from server import send_message_to_client
 import json
 
 INVALID_ACTION = "The action you sent is not valid"
@@ -15,9 +17,6 @@ ERROR_MESSAGE = "There is one or multiple errors in the message you sent"
 ZONE_ERROR = "There is an error with your current zone"
 PERSON_ERROR = "The person you are trying to talk to does not exist or is currently not in your zone"
 
-def send_message(receiver: str, request: str):
-    print(f"receiver: {receiver}\n{request}\n")
-
 class Core:
     def __init__(self) -> None:
         self.places = {
@@ -28,6 +27,9 @@ class Core:
             "market": [],
             "school": []
         }
+
+    def add_new_user(user):
+        self.place["parc"].append([user])
 
     # Verify if the json file is complete
     def process(self, request: str):
@@ -48,11 +50,11 @@ class Core:
             return
 
         if data.get("action") not in actions_dict:
-            send_message(data["sender"], INVALID_ACTION)
+            send_message_to_client(data["sender"], INVALID_ACTION)
             return
 
         if not self.validate_arguments(data):
-            send_message(data["sender"], MISSING_ARGUMENTS)
+            send_message_to_client(data["sender"], MISSING_ARGUMENTS)
             return
 
         action = actions_dict[data["action"]]
@@ -94,9 +96,9 @@ class Core:
         location = data.get("location")
         if location in self.places:
             self.places[location].append([data["sender"]])
-            send_message(data["sender"], f"You moved successfully to {location}")
+            send_message_to_client(data["sender"], f"You moved successfully to {location}")
         else:
-            send_message(data["sender"], INVALID_LOCATION)
+            send_message_to_client(data["sender"], INVALID_LOCATION)
 
     # Sender join an specific discussion group
     def join_group(self, data: dict):
@@ -106,17 +108,16 @@ class Core:
                     self.remove_from_current_group(data["sender"])
                     discussion_group.append(data["sender"])
                     for neighbor in discussion_group:
-                        send_message(neighbor, f"{data['sender']} joined your discussion group")
-                    send_message(data["sender"], f"You moved successfully to {data['group_to_join']}'s discussion group")
+                        send_message_to_client(neighbor, f"{data['sender']} joined your discussion group")
+                    send_message_to_client(data["sender"], f"You moved successfully to {data['group_to_join']}'s discussion group")
                     return
-        send_message(data["sender"], INVALID_DISCUSSION_GROUP)
+        send_message_to_client(data["sender"], INVALID_DISCUSSION_GROUP)
 
     # Sender speak in his current discussion group
     def speak_in_group(self, data: dict):
         discussion_group = self.get_current_discussion_group(data["sender"])
         if discussion_group is None:
-            send_message(data["sender"], INVALID_DISCUSSION_GROUP)
+            send_message_to_client(data["sender"], INVALID_DISCUSSION_GROUP)
             return
         for neighbor in discussion_group:
-            send_message(neighbor, f"{data['sender']} said: '{data['message']}'")
-
+            send_message_to_client(neighbor, f"{data['sender']} said: '{data['message']}'")

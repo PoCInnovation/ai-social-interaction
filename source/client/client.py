@@ -27,6 +27,13 @@ while True:
                 print('Déconnexion du serveur')
                 sys.exit()
             else:
+
+
+
+                # MESSAGE RECU PAR LE CLIENT
+
+
+
                 print(message.decode('utf-8'))
         else:
             message = sys.stdin.readline().strip()
