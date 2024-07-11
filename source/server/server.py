@@ -29,17 +29,6 @@ def receive_message(client_socket):
     except:
         return False
 
-def send_message_to_client(target_client_name, message):
-    for client_socket, client_name in clients.items():
-        if str(client_name).lower == str(target_client_name).lower:
-            try:
-                message_header = f"{len(message):<{BUFFER_SIZE}}".encode('utf-8')
-                client_socket.send(message_header + message.encode('utf-8'))
-                return True
-            except:
-                return False
-    return False
-
 while True:
     read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list)
 
@@ -61,8 +50,7 @@ while True:
                 del clients[notified_socket]
                 continue
             client_name = clients[notified_socket]
-            print(f'Message reçu de {client_name}: {message}')
-            core.process(message)
+            core.process(notified_socket, message, clients)
 
     for notified_socket in exception_sockets:
         sockets_list.remove(notified_socket)

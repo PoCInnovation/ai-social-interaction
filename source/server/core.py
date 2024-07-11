@@ -5,8 +5,9 @@
 ## core
 ##
 
-from server import send_message_to_client
 import json
+
+BUFFER_SIZE = 1024
 
 INVALID_ACTION = "The action you sent is not valid"
 INVALID_DISCUSSION_GROUP = "The discussion group you sent is invalid"
@@ -19,6 +20,7 @@ PERSON_ERROR = "The person you are trying to talk to does not exist or is curren
 
 class Core:
     def __init__(self) -> None:
+        self.clients = {}
         self.places = {
             "parc": [],
             "street": [],
@@ -28,15 +30,32 @@ class Core:
             "school": []
         }
 
-    def add_new_user(user):
-        self.place["parc"].append([user])
+    def send_message(self, socket, message):
+        print(f"Envoi de: {message}")
+        message_header = f"{len(message):<{BUFFER_SIZE}}"
+        socket.send(bytes(message_header, 'utf-8') + bytes(message, 'utf-8'))
+
+    def send_message_to_client(self, target_client_name, message):
+        for client_socket, client_name in self.clients.items():
+            if str(client_name).lower() == str(target_client_name).lower():
+                try:
+                    message_header = f"{len(message):<{BUFFER_SIZE}}".encode('utf-8')
+                    client_socket.send(message_header + message.encode('utf-8'))
+                    return True
+                except:
+                    return False
+        return False
+
+    def add_new_user(self, user):
+        self.places["parc"].append([user])
 
     # Verify if the json file is complete
-    def process(self, request: str):
+    def process(self, notified_socket, request: str, updated_clients):
+        self.clients = updated_clients.copy()
         try:
             data: dict = json.loads(request)
         except json.JSONDecodeError:
-            print(ERROR_MESSAGE)
+            self.send_message(notified_socket, ERROR_MESSAGE)
             return
 
         actions_dict = {
@@ -46,15 +65,15 @@ class Core:
         }
 
         if not data.get("sender"):
-            print(INVALID_SENDER)
+            self.send_message(notified_socket, INVALID_SENDER)
             return
 
         if data.get("action") not in actions_dict:
-            send_message_to_client(data["sender"], INVALID_ACTION)
+            self.send_message_to_client(data["sender"], INVALID_ACTION)
             return
 
         if not self.validate_arguments(data):
-            send_message_to_client(data["sender"], MISSING_ARGUMENTS)
+            self.send_message_to_client(data["sender"], MISSING_ARGUMENTS)
             return
 
         action = actions_dict[data["action"]]
@@ -96,9 +115,9 @@ class Core:
         location = data.get("location")
         if location in self.places:
             self.places[location].append([data["sender"]])
-            send_message_to_client(data["sender"], f"You moved successfully to {location}")
+            self.send_message_to_client(data["sender"], f"You moved successfully to {location}")
         else:
-            send_message_to_client(data["sender"], INVALID_LOCATION)
+            self.send_message_to_client(data["sender"], INVALID_LOCATION)
 
     # Sender join an specific discussion group
     def join_group(self, data: dict):
@@ -108,16 +127,16 @@ class Core:
                     self.remove_from_current_group(data["sender"])
                     discussion_group.append(data["sender"])
                     for neighbor in discussion_group:
-                        send_message_to_client(neighbor, f"{data['sender']} joined your discussion group")
-                    send_message_to_client(data["sender"], f"You moved successfully to {data['group_to_join']}'s discussion group")
+                        self.send_message_to_client(neighbor, f"{data['sender']} joined your discussion group")
+                    self.send_message_to_client(data["sender"], f"You moved successfully to {data['group_to_join']}'s discussion group")
                     return
-        send_message_to_client(data["sender"], INVALID_DISCUSSION_GROUP)
+        self.send_message_to_client(data["sender"], INVALID_DISCUSSION_GROUP)
 
     # Sender speak in his current discussion group
     def speak_in_group(self, data: dict):
         discussion_group = self.get_current_discussion_group(data["sender"])
         if discussion_group is None:
-            send_message_to_client(data["sender"], INVALID_DISCUSSION_GROUP)
+            self.send_message_to_client(data["sender"], INVALID_DISCUSSION_GROUP)
             return
         for neighbor in discussion_group:
-            send_message_to_client(neighbor, f"{data['sender']} said: '{data['message']}'")
+            self.send_message_to_client(neighbor, f"{data['sender']} said: '{data['message']}'")
