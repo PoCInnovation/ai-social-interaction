@@ -1,0 +1,31 @@
+
+Template for the json request :
+{
+    "action": "",
+    "sender": "",
+    "receiver": "",
+    "location": "",
+    "group_to_join": "",
+    "message": "", 
+}
+
+
+    - Sender: (string) Your name
+
+    - Receiver: (string) The name of the receiver if needed
+
+    - Location: (string) Just a location among this locations if needed
+        - Parc
+        - Street
+        - Work
+        - Restaurant
+
+    - Group_to_join: (string) only the name of somebody whose group you want to join if needed
+
+    - Message: (string) regular message to someone in your current group if needed
+
+    Each actions requiere specifics arguments be sure to use the right ones
+    - action: (string) 
+        - "go_to_location", needs "sender" and "location"
+        - "join_group" needs "sender" and "group_to_join"
+        - "speak_in_current_group" needs "sender" and "message"

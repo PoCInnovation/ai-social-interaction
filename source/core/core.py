@@ -185,11 +185,11 @@ class Core:
 
 
 class Entity:
-    def __init__(self, name, action_list=[]):
+    def __init__(self, name, memory):
         self.name = name
-        self.action_list = action_list
         self.cooldown = 1
         self.current_action = "None"
+        self.memory = memory
 
     def process(self, message):
         if self.cooldown <= 0 and len(self.action_list) > 0:
@@ -200,7 +200,7 @@ class Entity:
 if __name__ == "__main__":
     core = Core(
         entities={
-            "MARTIN" : Entity("MARTIN", ["move:MARTIN:park", "talk:MARTIN:ANTOINE:Bonjour mon ami"]),
+            "MARTIN" : Entity("MARTIN", ["move:MARTIN:park", "move:MARTIN:restaurent"]),
             "ANTOINE" : Entity("ANTOINE", ["move:ANTOINE:park"]),
         },
         debug=True
@@ -213,32 +213,32 @@ if __name__ == "__main__":
         core.print_places()
 
 
-def ask_action():
-    return ask_question("You are MICHEL a villager, you can choose one action between those one : move (to an other place), talk (to an other person)."
-                       "You are in the park. The person around you are MARTIN and GUSTAVE."
-                       "You can move to : parc, work, restaurent, cafe."
-                       "Write the answer like those exemple format: [move:work], [talk:GUSTAVE], [talk:MARTIN], ...")
+# def ask_action():
+#     return ask_question("You are MICHEL a villager, you can choose one action between those one : move (to an other place), talk (to an other person)."
+#                        "You are in the park. The person around you are MARTIN and GUSTAVE."
+#                        "You can move to : parc, work, restaurent, cafe."
+#                        "Write the answer like those exemple format: [move:work], [talk:GUSTAVE], [talk:MARTIN], ...")
 
-def extract_response(ai_response):
-    if "[" in ai_response and "]" in ai_response:
-        response = ai_response.split("[")[1].split("]")[0]
-        if ":" not in response:
-            return -1
-        return response.split(":")
-    return -1
+# def extract_response(ai_response):
+#     if "[" in ai_response and "]" in ai_response:
+#         response = ai_response.split("[")[1].split("]")[0]
+#         if ":" not in response:
+#             return -1
+#         return response.split(":")
+#     return -1
 
-def get_action():
-    error_counter = 0
-    response = extract_response(ask_action())
-    while response == -1:
-        error_counter += 1
-        if error_counter >= 5:
-            print("ERROR: to much error in extraction")
-            exit(0)
-        response = extract_response(ask_action())
-    return [param.strip() for param in response]
+# def get_action():
+#     error_counter = 0
+#     response = extract_response(ask_action())
+#     while response == -1:
+#         error_counter += 1
+#         if error_counter >= 5:
+#             print("ERROR: to much error in extraction")
+#             exit(0)
+#         response = extract_response(ask_action())
+#     return [param.strip() for param in response]
 
 
-if __name__ == "__main__":
-    for _ in range(10):
-        print(get_action())
+# if __name__ == "__main__":
+#     for _ in range(10):
+#         print(get_action())
