@@ -36,6 +36,13 @@ class Core:
         socket.send(bytes(message_header, 'utf-8') + bytes(message, 'utf-8'))
 
     def send_message_to_client(self, target_client_name, message):
+
+        place = self.get_current_place(target_client_name)
+        group_participants = ", ".join(self.get_current_discussion_group())
+        place_participants = ", ".join(self.get_current_place_participants())
+
+        message = f"You are in the {place} with {group_participants} Your current chat groupe is with {group_participants} it's {self.current_time} time\n{message}"
+
         for client_socket, client_name in self.clients.items():
             if str(client_name).lower() == str(target_client_name).lower():
                 try:
@@ -97,6 +104,23 @@ class Core:
                 if sender in discussion_group:
                     return discussion_group
         return None
+    
+    # Get The current place group of the sender
+    def get_current_place(self, sender: str) -> str:
+        for place in self.places:
+            for discussion_group in self.places[place]:
+                if sender in discussion_group:
+                    return place
+        return None
+    
+    # Get the current place's participans
+    def get_current_place_participants(self, sender: str) -> str:
+        people = []
+        for place in self.places:
+            for discussion_group in self.places[place]:
+                for entity in discussion_group:
+                    people.append(entity)
+        return []
 
     # Remove Sender From his current discussion group
     def remove_from_current_group(self, sender: str):

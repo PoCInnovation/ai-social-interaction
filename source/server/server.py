@@ -30,6 +30,9 @@ def receive_message(client_socket):
         return False
 
 while True:
+
+    
+
     read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list)
 
     for notified_socket in read_sockets:
