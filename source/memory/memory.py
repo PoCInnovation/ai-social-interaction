@@ -57,11 +57,11 @@ class Memory:
         self.memory = ask_question(messages)
 
     # Check if the entity want to continu his action
-    def continu_action(self, position, env, time, event):
+    def ask_continue_action(self, position, env, time, event):
         messages = [
             {"role": "system","content": context + ".Your name is " + self.name + self.memory},
             {"role": "system","content": "You are in the " + position + " with " + env + "it's " + time + ", you are currently doing :" + self.action + " and " + event},
-            {"role": "user","content" : "Response with only :  [Yes] if you want to keep making your action else response with only : [No]"}
+            {"role": "user","content" : "Response with only :  [Yes] if you want to keep making your action or response with only : [No] if you want to make an other action"}
         ]
         res = ask_question(messages)
         print(res)
@@ -69,6 +69,7 @@ class Memory:
             return False
         return True
 
+    # Get an action in the json format of norm.txt
     def get_action(self, position, env, time, group):
         messages = [
             {"role": "system","content": context + ".Your name is " + self.name + self.memory},
@@ -89,4 +90,5 @@ memory.create_memory("Antoine", description)
 memory.synthesizes_memory()
 memory.add_to_memory("I need to talk with janisse")
 memory.action = "Waiting for janisse to arrive"
-print(memory.get_action(position, env, time, "Thomas and Antoine"))
+memory.action = memory.get_action(position, env, time, "Thomas and Antoine")
+print(memory.action)
