@@ -20,6 +20,7 @@ PERSON_ERROR = "The person you are trying to talk to does not exist or is curren
 
 class Core:
     def __init__(self) -> None:
+        self.current_time = 0
         self.clients = {}
         self.places = {
             "parc": [],
@@ -36,10 +37,9 @@ class Core:
         socket.send(bytes(message_header, 'utf-8') + bytes(message, 'utf-8'))
 
     def send_message_to_client(self, target_client_name, message):
-
         place = self.get_current_place(target_client_name)
-        group_participants = ", ".join(self.get_current_discussion_group())
-        place_participants = ", ".join(self.get_current_place_participants())
+        group_participants = ", ".join(self.get_current_discussion_group(target_client_name))
+        place_participants = ", ".join(self.get_current_place_participants(target_client_name))
 
         message = f"You are in the {place} with {group_participants} Your current chat groupe is with {group_participants} it's {self.current_time} time\n{message}"
 
