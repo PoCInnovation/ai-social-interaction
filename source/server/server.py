@@ -7,7 +7,9 @@ SERVER_PORT = 12345
 BUFFER_SIZE = 1024
 MAX_CLIENTS = 10
 
-clients = {}
+current_time = 0
+
+client_socket_map = {}
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -30,6 +32,10 @@ def receive_message(client_socket):
         return False
 
 while True:
+
+    core.execute_finished_actions(current_time)
+    core.ask_actions_to_do(client_socket_map)
+
     read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list, 1)
 
     for notified_socket in read_sockets:
@@ -39,19 +45,20 @@ while True:
             if client_name is False:
                 continue
             sockets_list.append(client_socket)
-            clients[client_socket] = client_name
+            client_socket_map[client_socket] = client_name
             core.add_new_user(client_name)
             print(f'Nouvelle connexion établie depuis {client_address[0]}:{client_address[1]} avec le nom {client_name}')
         else:
             message = receive_message(notified_socket)
             if message is False:
-                print(f'Connexion fermée depuis {clients[notified_socket]}')
+                print(f'Connexion fermée depuis {client_socket_map[notified_socket]}')
                 sockets_list.remove(notified_socket)
-                del clients[notified_socket]
+                del client_socket_map[notified_socket]
                 continue
-            client_name = clients[notified_socket]
-            core.process(notified_socket, message, clients)
+            client_name = client_socket_map[notified_socket]
+            core.process(notified_socket, message, client_socket_map, current_time)
 
     for notified_socket in exception_sockets:
         sockets_list.remove(notified_socket)
-        del clients[notified_socket]
+        del client_socket_map[notified_socket]
+    current_time += 1
