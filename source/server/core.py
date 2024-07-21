@@ -178,7 +178,7 @@ class Core:
                 if client["name"].lower() == data["sender"].lower():
                     self.remove_from_current_group(data["sender"])
                     client["current_action"] = {"name": "go to location", "execution_time": current_time + GO_TO_LOCATION_TIME, "data": data, "function": self.execute_go_to_location}
-            self.send_message_to_client(data["sender"], f"You start mooving to {location}")
+            self.send_message_to_client(data["sender"], f"You start moving to {location}")
         else:
             self.send_message_to_client(data["sender"], INVALID_LOCATION)
 

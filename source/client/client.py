@@ -50,16 +50,16 @@ while True:
             action = memory.get_action(position, env, time, "Thomas")
             print("action :\n" + action)
             send_message(client_socket, action)
-        else:
-            message = sys.stdin.readline().strip()
-            message = '''
-            {
-                "action": "go_to_location",
-                "sender": "pierre",
-                "receiver": "",
-                "location": "parc",
-                "group_to_join": "",
-                "message": "" 
-            }
-            '''
-            send_message(client_socket, message)
+        # else:
+        #     message = sys.stdin.readline().strip()
+        #     message = '''
+        #     {
+        #         "action": "go_to_location",
+        #         "sender": "pierre",
+        #         "receiver": "",
+        #         "location": "parc",
+        #         "group_to_join": "",
+        #         "message": "" 
+        #     }
+        #     '''
+        #     send_message(client_socket, message)
