@@ -71,10 +71,10 @@ class Memory:
         return True
 
     # Get an action in the json format of norm.txt
-    def get_action(self, position, env, time, group):
+    def get_action(self, env_message):
         messages = [
             {"role": "system","content": context + ".Your name is " + self.name + self.memory},
-            {"role": "system","content": "You are in the " + position + " with " + env + "Your current chat groupe is with" + group + "it's " + time},
+            {"role": "system","content": env_message},
             {"role": "user","content" : "Choose an action to do only answer with this json format :" + action_norm}
         ]
         action = ask_question(messages)

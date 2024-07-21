@@ -49,7 +49,7 @@ while True:
             message = receive_message(client_socket)
             print(f"Message reçu du serveur: {message}")
             if message.endswith("WHAT ACTION DO YOU WANT TO DO ?"):
-                action = memory.get_action(position, env, time, "Thomas")
+                action = memory.get_action(message.split("WHAT")[0])
                 print("action :\n" + action)
                 send_message(client_socket, action)
         # else:

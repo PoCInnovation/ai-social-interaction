@@ -47,7 +47,7 @@ class Core:
         if ((self.get_current_place_participants(target_client_name))):
             place_participants = ", ".join(self.get_current_place_participants(target_client_name))
 
-        message = f"You are in the {place} with {group_participants} Your current chat groupe is with {group_participants} it's {self.current_time} time\n{message}"
+        message = f"You are in the {place} with {group_participants} Your current chat groupe is with {group_participants}\n{message}" # it's {self.current_time} time\n{message}"
 
         for client_socket, client_name in self.client_socket_map.items():
             if str(client_name).lower() == str(target_client_name).lower():

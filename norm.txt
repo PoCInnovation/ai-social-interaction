@@ -1,14 +1,4 @@
-=== COMMUNICATION PROTOCOL ===
-
-Here is how threads communicate with the CORE;
-On the other hand CORE simply awnser what threads have to directly send to IA;
-
-example: Henri said: "Hello Jack, How are you"
-         The discussion group you sent is invalid
-
-
-== JSON REQUEST FILE ==
-
+Template for the json request :
 {
     "action": "",
     "sender": "",
@@ -18,24 +8,17 @@ example: Henri said: "Hello Jack, How are you"
     "message": "", 
 }
 
-== ATTRIBUTES ==
 
-    - Sender: (string) The name of the sender
+- Sender: (string) Your name
 
-    - Receiver: (string) The name of the receiver
+- Receiver: (string) The name of the receiver if needed
 
-    - Location: (string) Just a location
-        - Parc
-        - Street
-        - Work
-        - Restaurant
+- Location: (string) Just a location among those locations : [parc, street, work, restaurant]
 
-    - Group_to_join: (string) name of somebody whose group you want to join
+- Group_to_join: (string) only the name of somebody whose group you want to join if needed
 
-    - Message: (string) regular message if needed
+- Message: (string) regular message to someone in your current group if needed
 
-    - Code: (int) Exit code of the request
-
-    - action: (string) 
-        - "go_to_location", needs "sender" and "location"
-
+Each actions requiere specifics arguments be sure to use the right ones
+- action: (string) 
+    - "go_to_location", needs "sender" and "location", don't choose your current location
