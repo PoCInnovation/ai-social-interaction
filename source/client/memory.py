@@ -6,6 +6,7 @@ load_dotenv()
 
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
+
 context = "For a simulation of a village, you are a villager in a small town."
 with open(os.path.dirname(__file__) + "/../../norm.txt", "r") as norm_file:    
     action_norm = norm_file.read()
@@ -26,11 +27,10 @@ def ask_question(messages):
     return res
 
 class Memory:
-    def __init__(self, name, description) -> None:
+    def __init__(self) -> None:
         self.action = ""
-        self.name = name
-        self.create_memory(name, description)
-        self.synthesizes_memory()
+        self.memory = ""
+        self.name = ""
 
     # Create a memory string from a description
     def create_memory(self, name,  description):
@@ -79,17 +79,15 @@ class Memory:
         ]
         action = ask_question(messages)
         return action
-    
-    def __repr__(self) -> str:
-        return self.memory
 
-description = "You'r a Blacksmith, you love soccers and you are married with Janisse."
-places = "house, park, townhall, school, work"
-position = "house"
-time = "10am"
-env = "Janisse, Matthieu, Thomas"
 
 if __name__ == "__main__":
+    description = "You'r a Blacksmith, you love soccers and you are married with Janisse."
+    places = "house, park, townhall, school, work"
+    position = "house"
+    time = "10am"
+    env = "Janisse, Matthieu, Thomas"
+
     memory = Memory()
     memory.create_memory("Antoine", description)
     memory.synthesizes_memory()
