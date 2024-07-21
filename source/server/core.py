@@ -170,7 +170,7 @@ class Core:
     # Sender go to an specific location
     def go_to_location(self, data: dict, current_time: int):
 
-        GO_TO_LOCATION_TIME = 10
+        GO_TO_LOCATION_TIME = 2
 
         location = data.get("location").lower()
         if location in self.places:
@@ -187,7 +187,7 @@ class Core:
 
             if client["name"].lower() == data["sender"].lower():
                 client["current_action"] = None
-        location = data.get("location")
+        location = data.get("location").lower()
         self.places[location].append([data["sender"]])
         self.send_message_to_client(data["sender"], f"You moved successfully to {location}")
 

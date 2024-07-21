@@ -36,7 +36,7 @@ while True:
     core.execute_finished_actions(current_time)
     core.ask_actions_to_do(client_socket_map)
 
-    read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list, 10)
+    read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list, 2)
 
     for notified_socket in read_sockets:
         if notified_socket == server_socket:

@@ -35,7 +35,8 @@ memory.synthesizes_memory()
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect((SERVER_HOST, SERVER_PORT))
 
-name = input("Entrez votre nom: ")
+# name = input("Entrez votre nom: ")
+name = "Antoine"
 send_message(client_socket, name)
 
 
@@ -47,9 +48,10 @@ while True:
         if notified_socket == client_socket:
             message = receive_message(client_socket)
             print(f"Message reçu du serveur: {message}")
-            action = memory.get_action(position, env, time, "Thomas")
-            print("action :\n" + action)
-            send_message(client_socket, action)
+            if message.endswith("WHAT ACTION DO YOU WANT TO DO ?"):
+                action = memory.get_action(position, env, time, "Thomas")
+                print("action :\n" + action)
+                send_message(client_socket, action)
         # else:
         #     message = sys.stdin.readline().strip()
         #     message = '''
