@@ -20,25 +20,9 @@ def receive_message(socket):
     message = socket.recv(message_length).decode('utf-8')
     return message
 
-description = "You'r a Blacksmith, you love soccers and you are married with Janisse."
-places = "house, park, townhall, school, work"
-position = "house"
-time = "10am"
-env = "Janisse, Matthieu, Thomas"
-
-memory = Memory()
-memory.create_memory("Antoine", description)
-memory.synthesizes_memory()
-# memory.add_to_memory("I need to talk with janisse")
-# memory.action = memory.get_action(position, env, time, "Thomas and Antoine")
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect((SERVER_HOST, SERVER_PORT))
-
-# name = input("Entrez votre nom: ")
-name = "Antoine"
-send_message(client_socket, name)
-
 
 while True:
     sockets_list = [sys.stdin, client_socket]
@@ -52,6 +36,11 @@ while True:
                 action = memory.get_action(message.split("WHAT")[0])
                 print("action :\n" + action)
                 send_message(client_socket, action)
+            if message.startswith("STARTING MESSAGE"):
+                message = message.split(":")
+                memory = Memory()
+                memory.create_memory(message[1], message[2])
+                memory.synthesizes_memory()
         # else:
         #     message = sys.stdin.readline().strip()
         #     message = '''

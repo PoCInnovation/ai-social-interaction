@@ -2,6 +2,7 @@ from core import Core
 import socket
 import select
 import time
+import os
 
 SERVER_HOST = '127.0.0.1'
 SERVER_PORT = 12345
@@ -19,6 +20,10 @@ server_socket.listen(MAX_CLIENTS)
 
 sockets_list = [server_socket]
 core = Core()
+
+
+with open(os.path.dirname(__file__) + "/descriptions.txt", "r") as description_file:    
+    descriptions = description_file.read().split("\n")
 
 print(f'Serveur démarré sur {SERVER_HOST}:{SERVER_PORT}')
 
@@ -44,13 +49,13 @@ while True:
         for notified_socket in read_sockets:
             if notified_socket == server_socket:
                 client_socket, client_address = server_socket.accept()
-                client_name = receive_message(client_socket)
-                if client_name is False:
-                    continue
+                description = descriptions.pop()
+                client_name = description.split(":")[0]
                 sockets_list.append(client_socket)
                 client_socket_map[client_socket] = client_name
                 core.add_new_user(client_name)
                 print(f'Nouvelle connexion établie depuis {client_address[0]}:{client_address[1]} avec le nom {client_name}')
+                core.send_message(client_socket, "STARTING MESSAGE:"+description)
             else:
                 message = receive_message(notified_socket)
                 if message is False:
