@@ -21,4 +21,4 @@ Template for the json request :
 
 Each actions requiere specifics arguments be sure to use the right ones
 - action: (string) 
-    - "go_to_location", needs "sender" and "location", don't choose your current location
+    - "go_to_location", needs "sender" and "location" (a different location from the one you're at)
