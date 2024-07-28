@@ -6,7 +6,6 @@ load_dotenv()
 
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-
 context = "For a simulation of a village, you are a villager in a small town."
 with open(os.path.dirname(__file__) + "/../../norm.txt", "r") as norm_file:    
     action_norm = norm_file.read()
@@ -81,17 +80,17 @@ class Memory:
         return action
 
 
-if __name__ == "__main__":
-    description = "You'r a Blacksmith, you love soccers and you are married with Janisse."
-    places = "house, park, townhall, school, work"
-    position = "house"
-    time = "10am"
-    env = "Janisse, Matthieu, Thomas"
+# if __name__ == "__main__":
+#     description = "You'r a Blacksmith, you love soccers and you are married with Janisse."
+#     places = "house, park, townhall, school, work"
+#     position = "house"
+#     time = "10am"
+#     env = "Janisse, Matthieu, Thomas"
 
-    memory = Memory()
-    memory.create_memory("Antoine", description)
-    memory.synthesizes_memory()
-    memory.add_to_memory("I need to talk with janisse")
-    memory.action = "Waiting for janisse to arrive"
-    memory.action = memory.get_action(position, env, time, "Thomas and Antoine")
-    print(memory.action)
+#     memory = Memory()
+#     memory.create_memory("Antoine", description)
+#     memory.synthesizes_memory()
+#     memory.add_to_memory("I need to talk with janisse")
+#     memory.action = "Waiting for janisse to arrive"
+#     memory.action = memory.get_action(position, env, time, "Thomas and Antoine")
+#     print(memory.action)

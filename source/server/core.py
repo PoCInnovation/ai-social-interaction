@@ -1,22 +1,8 @@
-##
-## POC Project, 2024
-## Social Interaction
-## File description: core
-## core
-##
-
 import json
+import os
+from dotenv import load_dotenv
 
-BUFFER_SIZE = 1024
-
-INVALID_ACTION = "The action you sent is not valid"
-INVALID_DISCUSSION_GROUP = "The discussion group you sent is invalid"
-INVALID_LOCATION = "The location you sent is invalid"
-INVALID_SENDER = "The sender is invalid or missing"
-MISSING_ARGUMENTS = "The message is missing required arguments"
-ERROR_MESSAGE = "There is one or multiple errors in the message you sent"
-ZONE_ERROR = "There is an error with your current zone"
-PERSON_ERROR = "The person you are trying to talk to does not exist or is currently not in your zone"
+load_dotenv()
 
 class Core:
     def __init__(self) -> None:
@@ -34,7 +20,7 @@ class Core:
 
     def send_message(self, socket, message):
         print(f"Envoi de: {message}")
-        message_header = f"{len(message):<{BUFFER_SIZE}}"
+        message_header = f"{len(message):<{int(os.getenv("BUFFER_SIZE"))}}"
         socket.send(bytes(message_header, 'utf-8') + bytes(message, 'utf-8'))
 
     def send_message_to_client(self, target_client_name, message):
@@ -52,7 +38,7 @@ class Core:
         for client_socket, client_name in self.client_socket_map.items():
             if str(client_name).lower() == str(target_client_name).lower():
                 try:
-                    message_header = f"{len(message):<{BUFFER_SIZE}}".encode('utf-8')
+                    message_header = f"{len(message):<{int(os.getenv("BUFFER_SIZE"))}}".encode('utf-8')
                     client_socket.send(message_header + message.encode('utf-8'))
                     return True
                 except:
@@ -89,7 +75,7 @@ class Core:
         try:
             data: dict = json.loads(request)
         except json.JSONDecodeError:
-            self.send_message(notified_socket, ERROR_MESSAGE)
+            self.send_message(notified_socket, os.getenv("ERROR_MESSAGE"))
             return
 
         actions_dict = {
@@ -99,15 +85,15 @@ class Core:
         }
 
         if not data.get("sender"):
-            self.send_message(notified_socket, INVALID_SENDER)
+            self.send_message(notified_socket, os.getenv("INVALID_SENDER"))
             return
 
         if data.get("action") not in actions_dict:
-            self.send_message_to_client(data["sender"], INVALID_ACTION)
+            self.send_message_to_client(data["sender"], os.getenv("INVALID_ACTION"))
             return
 
         if not self.validate_arguments(data):
-            self.send_message_to_client(data["sender"], MISSING_ARGUMENTS)
+            self.send_message_to_client(data["sender"], os.getenv("MISSING_ARGUMENTS"))
             return
 
         action = actions_dict[data["action"]]
@@ -180,7 +166,7 @@ class Core:
                     client["current_action"] = {"name": "go to location", "execution_time": current_time + GO_TO_LOCATION_TIME, "data": data, "function": self.execute_go_to_location}
             self.send_message_to_client(data["sender"], f"You start moving to {location}")
         else:
-            self.send_message_to_client(data["sender"], INVALID_LOCATION)
+            self.send_message_to_client(data["sender"], os.getenv("INVALID_LOCATION"))
 
     def execute_go_to_location(self, data):
         for client in self.clients:
@@ -204,7 +190,7 @@ class Core:
                         self.send_message_to_client(neighbor, f"{data['sender']} joined your discussion group")
                     self.send_message_to_client(data["sender"], f"You moved successfully to {data['group_to_join']}'s discussion group")
                     return
-        self.send_message_to_client(data["sender"], INVALID_DISCUSSION_GROUP)
+        self.send_message_to_client(data["sender"], os.getenv("INVALID_DISCUSSION_GROUP"))
 
 
 
@@ -213,7 +199,7 @@ class Core:
     def speak_in_group(self, data: dict, current_time: int):
         discussion_group = self.get_current_discussion_group(data["sender"])
         if discussion_group is None:
-            self.send_message_to_client(data["sender"], INVALID_DISCUSSION_GROUP)
+            self.send_message_to_client(data["sender"], os.getenv("INVALID_DISCUSSION_GROUP"))
             return
         for neighbor in discussion_group:
             self.send_message_to_client(neighbor, f"{data['sender']} said: '{data['message']}'")

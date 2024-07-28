@@ -1,18 +1,18 @@
 import socket
 import sys
+import os
 import select
 from memory import Memory
+from dotenv import load_dotenv
 
-SERVER_HOST = '127.0.0.1'
-SERVER_PORT = 12345
-BUFFER_SIZE = 1024
+load_dotenv()
 
 def send_message(socket, message):
-    message_header = f"{len(message):<{BUFFER_SIZE}}"
+    message_header = f"{len(message):<{int(os.getenv("BUFFER_SIZE"))}}"
     socket.send(bytes(message_header, 'utf-8') + bytes(message, 'utf-8'))
 
 def receive_message(socket):
-    message_header = socket.recv(BUFFER_SIZE)
+    message_header = socket.recv(int(os.getenv("BUFFER_SIZE")))
     if not message_header:
         print('Déconnexion du serveur')
         sys.exit()
@@ -22,7 +22,7 @@ def receive_message(socket):
 
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.connect((SERVER_HOST, SERVER_PORT))
+client_socket.connect((os.getenv("SERVER_HOST"), int(os.getenv("SERVER_PORT"))))
 
 while True:
     sockets_list = [sys.stdin, client_socket]

@@ -3,11 +3,9 @@ import socket
 import select
 import time
 import os
+from dotenv import load_dotenv
 
-SERVER_HOST = '127.0.0.1'
-SERVER_PORT = 12345
-BUFFER_SIZE = 1024
-MAX_CLIENTS = 10
+load_dotenv()
 
 current_time = 0
 
@@ -15,8 +13,8 @@ client_socket_map = {}
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-server_socket.bind((SERVER_HOST, SERVER_PORT))
-server_socket.listen(MAX_CLIENTS)
+server_socket.bind((os.getenv("SERVER_HOST"), int(os.getenv("SERVER_PORT"))))
+server_socket.listen(int(os.getenv("MAX_CLIENTS")))
 
 sockets_list = [server_socket]
 core = Core()
@@ -25,11 +23,11 @@ core = Core()
 with open(os.path.dirname(__file__) + "/descriptions.txt", "r") as description_file:    
     descriptions = description_file.read().split("\n")
 
-print(f'Serveur démarré sur {SERVER_HOST}:{SERVER_PORT}')
+print(f'Serveur démarré sur {os.getenv("SERVER_HOST")}:{int(os.getenv("SERVER_PORT"))}')
 
 def receive_message(client_socket):
     try:
-        message_header = client_socket.recv(BUFFER_SIZE)
+        message_header = client_socket.recv(int(os.getenv("BUFFER_SIZE")))
         if not len(message_header):
             return False
         message_length = int(message_header.decode('utf-8').strip())
