@@ -1,6 +1,6 @@
 class DataConfig:
     SERVER_HOST = '127.0.0.1'
-    SERVER_PORT = 12345
+    SERVER_PORT = 12346
     BUFFER_SIZE = 1024
     MAX_CLIENTS = 20
 

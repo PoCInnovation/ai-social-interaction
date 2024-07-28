@@ -19,6 +19,5 @@ Template for the json request :
 
 - Message: (string) regular message to someone in your current group if needed
 
-Each actions requiere specifics arguments be sure to use the right ones
-- action: (string) 
+- action: (string) You have choice between theses all theses actions, Each action require specifics arguments so be sure to use the right ones
     - "go_to_location", needs "sender" and "location" (a different location from the one you're at)
