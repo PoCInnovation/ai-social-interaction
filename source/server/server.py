@@ -14,13 +14,15 @@ load_dotenv()
 
 class Server:
 
-    def receive_message(self, client_socket):
+    def receive_message(self, client_socket, core):
         try:
             message_header = client_socket.recv(DataConfig.BUFFER_SIZE)
             if not len(message_header):
                 return False
             message_length = int(message_header.decode('utf-8').strip())
-            return client_socket.recv(message_length).decode('utf-8')
+            message = client_socket.recv(message_length).decode('utf-8')
+            core.print_debug(f"Received: {message}")
+            return message
         except:
             return False
 
@@ -58,7 +60,7 @@ class Server:
                         print(f'Nouvelle connexion établie depuis {client_address[0]}:{client_address[1]} avec le nom {client_name}')
                         core.send_message(client_socket, "STARTING MESSAGE:" + client_name + ":" + description)
                     else:
-                        message = self.receive_message(notified_socket)
+                        message = self.receive_message(notified_socket, core)
                         if message is False:
                             print(f'Connexion fermée depuis {client_socket_map[notified_socket]}')
                             sockets_list.remove(notified_socket)

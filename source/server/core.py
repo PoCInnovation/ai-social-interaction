@@ -2,6 +2,18 @@ import json
 import os
 import sys
 import random
+import logging
+
+logging.basicConfig(
+    filename="app.log",
+    encoding="utf-8",
+    filemode="w",
+    format="{asctime} - {levelname} - {message}",
+    style="{",
+    datefmt="%Y-%m-%d %H:%M",
+    level=logging.DEBUG
+)
+logging.info("program start")
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -164,6 +176,7 @@ class Core:
         return tuple(description.split(":"))
     
     def print_debug(self, *args, **kwargs):
+        logging.debug(*args)
         if self.debug:
             print(*args, **kwargs)
     
