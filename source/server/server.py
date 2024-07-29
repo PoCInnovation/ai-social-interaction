@@ -35,7 +35,7 @@ class Server:
         server_socket.listen(DataConfig.MAX_CLIENTS)
 
         sockets_list = [server_socket]
-        core = Core()
+        core = Core(debug=False)
         
         print(f'Serveur démarré sur {DataConfig.SERVER_HOST}:{DataConfig.SERVER_PORT}')
 

@@ -11,7 +11,7 @@ from config import DataConfig
 
 load_dotenv()
 
-class Client:         
+class Client:
 
     def send_message(self, socket, message):
         message_header = f"{len(message):<{DataConfig.BUFFER_SIZE}}"

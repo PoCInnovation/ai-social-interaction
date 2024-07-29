@@ -11,7 +11,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Core:
-    def __init__(self) -> None:
+    def __init__(self, debug = False) -> None:
+        self.debug = debug
         self.current_time = 0
         self.clients = []
         self.client_socket_map = {}
@@ -25,55 +26,6 @@ class Core:
         }
         with open(os.path.dirname(__file__) + "/descriptions.txt", "r") as description_file:    
             self.descriptions = description_file.read().split("\n")
-
-    def send_message(self, socket, message):
-        print(f"Envoi de: {message}")
-        message_header = f"{len(message):<{DataConfig.BUFFER_SIZE}}"
-        socket.send(bytes(message_header, 'utf-8') + bytes(message, 'utf-8'))
-
-    def send_message_to_client(self, target_client_name, message):
-        place = self.get_current_place(target_client_name)
-        group_participants = ""
-        place_participants = ""
-
-        if ((self.get_current_discussion_group(target_client_name))):
-            group_participants = ", ".join(self.get_current_discussion_group(target_client_name))
-        if ((self.get_current_place_participants(target_client_name))):
-            place_participants = ", ".join(self.get_current_place_participants(target_client_name))
-
-        message = f"You are in the {place} with {place_participants} Your current chat groupe is with {group_participants}\n{message}" # it's {self.current_time} time\n{message}"
-
-        for client_socket, client_name in self.client_socket_map.items():
-            if str(client_name).lower() == str(target_client_name).lower():
-                try:
-                    message_header = f"{len(message):<{DataConfig.BUFFER_SIZE}}".encode('utf-8')
-                    client_socket.send(message_header + message.encode('utf-8'))
-                    return True
-                except:
-                    return False
-        return False
-
-    # Execute finished actions
-    def execute_finished_actions(self, current_time):
-        self.current_time = current_time
-
-        for client in self.clients:
-            if client["current_action"] != None and client["current_action"]["execution_time"] == current_time:
-                client["current_action"]["function"](client["current_action"]["data"])
-                client["current_action"] = None
-
-    # Ask actions to do
-    def ask_actions_to_do(self, clients: dict):
-        self.client_socket_map = clients.copy()
-
-        for client in self.clients:
-            if client["current_action"] == None:
-                print(f"{client['name']} IL FAIT RIEN")
-                self.send_message_to_client(client["name"], "WHAT ACTION DO YOU WANT TO DO ?")
-
-    def add_new_user(self, user):
-        self.places["street"].append([user])
-        self.clients.append({"name": user, "current_action": None})
 
     def process(self, notified_socket, request: str, updated_clients, current_time):
         self.current_time = current_time
@@ -106,9 +58,56 @@ class Core:
 
         action = actions_dict[data["action"]]
         action(data, current_time)
+    
+    def send_message(self, socket, message):
+        self.print_debug(f"Envoi: {message}")
+        message_header = f"{len(message):<{DataConfig.BUFFER_SIZE}}"
+        socket.send(bytes(message_header, 'utf-8') + bytes(message, 'utf-8'))
 
+    def send_message_to_client(self, target_client_name, message):
+        self.print_debug(f"Envoi a {target_client_name}: {message}")
+        place = self.get_current_place(target_client_name)
+        group_participants = ""
+        place_participants = ""
 
+        if ((self.get_current_discussion_group(target_client_name))):
+            group_participants = ", ".join(self.get_current_discussion_group(target_client_name))
+        if ((self.get_current_place_participants(target_client_name))):
+            place_participants = ", ".join(self.get_current_place_participants(target_client_name))
 
+        message = f"You are in the {place} with {place_participants} Your current chat groupe is with {group_participants}\n{message}" # it's {self.current_time} time\n{message}"
+
+        for client_socket, client_name in self.client_socket_map.items():
+            if str(client_name).lower() == str(target_client_name).lower():
+                try:
+                    message_header = f"{len(message):<{DataConfig.BUFFER_SIZE}}".encode('utf-8')
+                    client_socket.send(message_header + message.encode('utf-8'))
+                    return True
+                except:
+                    return False
+        return False
+
+    # Execute finished actions
+    def execute_finished_actions(self, current_time):
+        self.current_time = current_time
+
+        print("-"*10, "Current_time:", current_time, "-"*10)
+        for client in self.clients:
+            self.print_client_info(client, current_time)
+            if client["current_action"] != None and client["current_action"]["execution_time"] == current_time:
+                client["current_action"]["function"](client["current_action"]["data"])
+                client["current_action"] = None
+
+    # Ask actions to do
+    def ask_actions_to_do(self, clients: dict):
+        self.client_socket_map = clients.copy()
+        for client in self.clients:
+            if client["current_action"] == None:
+                self.send_message_to_client(client["name"], "WHAT ACTION DO YOU WANT TO DO ?")
+
+    def add_new_user(self, user):
+        self.places["street"].append([user])
+        self.clients.append({"name": user, "current_action": None})
 
     # Verify if the json file is complete
     def validate_arguments(self, data: dict) -> bool:
@@ -163,7 +162,18 @@ class Core:
         else:
             description = "Tobby:You'r a shy guy, you don't speak a lot"
         return tuple(description.split(":"))
-
+    
+    def print_debug(self, *args, **kwargs):
+        if self.debug:
+            print(*args, **kwargs)
+    
+    def print_client_info(self, client, current_time):
+        if client["current_action"] != None:
+            print(f"{client['name']} | ", end="")
+            print(', '.join(str(key)+': '+str(value) for key, value in client['current_action']['data'].items() if value and key != 'sender'), end="")
+            print(f" | time left: {client['current_action']['execution_time'] - current_time}")
+        else:
+            print(f"{client['name']} | do nothing")
 
 
 
