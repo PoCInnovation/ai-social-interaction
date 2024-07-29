@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import random
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -22,6 +23,8 @@ class Core:
             "market": [],
             "school": []
         }
+        with open(os.path.dirname(__file__) + "/descriptions.txt", "r") as description_file:    
+            self.descriptions = description_file.read().split("\n")
 
     def send_message(self, socket, message):
         print(f"Envoi de: {message}")
@@ -153,6 +156,13 @@ class Core:
     def clean_useless_discussion_groups(self):
         for place in self.places:
             self.places[place] = [group for group in self.places[place] if group]
+    
+    def get_new_description(self):
+        if (len(self.descriptions) != 0):
+            description = self.descriptions.pop(random.randint(0, len(self.descriptions) - 1))
+        else:
+            description = "Tobby:You'r a shy guy, you don't speak a lot"
+        return tuple(description.split(":"))
 
 
 

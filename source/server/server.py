@@ -4,7 +4,6 @@ import select
 import time
 import sys
 import os
-import random
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -37,8 +36,7 @@ class Server:
 
         sockets_list = [server_socket]
         core = Core()
-        with open(os.path.dirname(__file__) + "/descriptions.txt", "r") as description_file:    
-            descriptions = description_file.read().split("\n")
+        
         print(f'Serveur démarré sur {DataConfig.SERVER_HOST}:{DataConfig.SERVER_PORT}')
 
         while True:
@@ -53,14 +51,12 @@ class Server:
                 for notified_socket in read_sockets:
                     if notified_socket == server_socket:
                         client_socket, client_address = server_socket.accept()
-                        if (len(descriptions) != 0):
-                            description = descriptions.pop(random.randint(0, len(descriptions) - 1))
-                        client_name = description.split(":")[0]
+                        client_name, description = core.get_new_description()
                         sockets_list.append(client_socket)
                         client_socket_map[client_socket] = client_name
                         core.add_new_user(client_name)
                         print(f'Nouvelle connexion établie depuis {client_address[0]}:{client_address[1]} avec le nom {client_name}')
-                        core.send_message(client_socket, "STARTING MESSAGE:"+description)
+                        core.send_message(client_socket, "STARTING MESSAGE:" + client_name + ":" + description)
                     else:
                         message = self.receive_message(notified_socket)
                         if message is False:
