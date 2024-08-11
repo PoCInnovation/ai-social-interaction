@@ -25,7 +25,7 @@ class Memory:
             model="llama3-8b-8192",
             messages=messages,
             temperature=1,
-            max_tokens=1024,
+            max_tokens=8192,
             top_p=1,
             stream=True,
             stop=None,

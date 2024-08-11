@@ -46,6 +46,7 @@ class Server:
             start_time = time.time()
             core.execute_finished_actions(current_time)
             core.ask_actions_to_do(client_socket_map)
+            core.transfer_info()
             while time.time() - start_time < 4:
 
                 read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list, 1)

@@ -1,8 +1,9 @@
-import json
-import os
-import sys
-import random
+from dotenv import load_dotenv
 import logging
+import random
+import json
+import sys
+import os
 
 logging.basicConfig(
     filename="app.log",
@@ -18,9 +19,17 @@ logging.info("program start")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import DataConfig
-from dotenv import load_dotenv
 
 load_dotenv()
+
+
+
+def cp_dict(value):
+    if not isinstance(value, dict):
+        return value
+    return {key:cp_dict(val) for key, val in value.items()}
+
+
 
 class Core:
     def __init__(self, debug = False) -> None:
@@ -187,8 +196,15 @@ class Core:
             print(f" | time left: {client['current_action']['execution_time'] - current_time}")
         else:
             print(f"{client['name']} | do nothing")
-
-
+    
+    def transfer_info(self):
+        clients_data = [cp_dict(client_data) for client_data in self.clients]
+        f = open("core_to_graphic_interface.txt", "a")
+        for client in clients_data:
+            if client["current_action"] != None and client["current_action"]["function"] != None:
+                del client["current_action"]["function"]
+        f.write("|".join(map(str, clients_data))+"\n")
+        f.close()
 
 
     # Sender go to an specific location
