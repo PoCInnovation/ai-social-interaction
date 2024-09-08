@@ -1,6 +1,19 @@
 from sys import argv
-import os
+from source.client.memory import Memory
+import signal
 import time
+import sys
+import os
+
+
+
+def signal_handler(sig, frame):
+    os.system('pkill -f "python ./main client"')
+    os.system('pkill -f "python ./main server"')
+    print("\nclient and server destroyed, program terminated cleanly")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
 
 
 if len(argv) < 3:
@@ -16,9 +29,15 @@ try:
 except ValueError:
     print("please enter a valid value for the number of seconds")
     exit(1)
+
+memory = Memory()
+memory.ask_question("test")
+
 os.system("./main server &")
 for i in range(int(argv[1])):
     os.system("./main client &")
+
 time.sleep(int(argv[2]))
+
 os.system('pkill -f "python ./main client"')
 os.system('pkill -f "python ./main server"')
