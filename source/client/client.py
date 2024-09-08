@@ -3,13 +3,10 @@ import sys
 import os
 import select
 from source.client.memory import Memory
-from dotenv import load_dotenv
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import DataConfig
-
-load_dotenv()
 
 class Client:
 
