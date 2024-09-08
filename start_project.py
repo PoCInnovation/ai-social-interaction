@@ -10,6 +10,7 @@ try:
     int(argv[1])
 except ValueError:
     print("please enter a valid value for the number of client")
+    exit(0)
 try:
     int(argv[2])
 except ValueError:
