@@ -17,7 +17,7 @@ class Memory:
         self.client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
         self.context = "For a simulation of a village, you are a villager in a small town."
-        with open(os.path.dirname(__file__) + "/../../norm.txt", "r") as norm_file:    
+        with open(os.path.dirname(__file__) + "/../../norm.txt", "r") as norm_file:
             self.action_norm = norm_file.read()
 
     def ask_question(self, messages):
@@ -25,7 +25,7 @@ class Memory:
             model="llama3-8b-8192",
             messages=messages,
             temperature=1,
-            max_tokens=8192,
+            max_tokens=2048,
             top_p=1,
             stream=True,
             stop=None,

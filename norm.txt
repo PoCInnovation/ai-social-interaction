@@ -5,7 +5,7 @@ Template for the json request :
     "receiver": "",
     "location": "",
     "group_to_join": "",
-    "message": "", 
+    "message": "",
 }
 
 
@@ -13,7 +13,7 @@ Template for the json request :
 
 - Receiver: (string) The name of the receiver if needed
 
-- Location: (string) Just a location among those locations : [parc, street, work, restaurant]
+- Location: (string) Just a location among those locations : [parc, work, restaurant]
 
 - Group_to_join: (string) only the name of somebody whose group you want to join if needed
 

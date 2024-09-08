@@ -45,13 +45,13 @@ class Core:
             "market": [],
             "school": []
         }
-        with open(os.path.dirname(__file__) + "/descriptions.txt", "r") as description_file:    
+        with open(os.path.dirname(__file__) + "/descriptions.txt", "r") as description_file:
             self.descriptions = description_file.read().split("\n")
 
     def process(self, notified_socket, request: str, updated_clients, current_time):
         self.current_time = current_time
         self.client_socket_map = updated_clients.copy()
-    
+
         # Verify if the json file is complete
         try:
             data: dict = json.loads(request)
@@ -79,7 +79,7 @@ class Core:
 
         action = actions_dict[data["action"]]
         action(data, current_time)
-    
+
     def send_message(self, socket, message):
         self.print_debug(f"Envoi: {message}")
         message_header = f"{len(message):<{DataConfig.BUFFER_SIZE}}"
@@ -128,7 +128,7 @@ class Core:
 
     def add_new_user(self, user):
         self.places["street"].append([user])
-        self.clients.append({"name": user, "current_action": None})
+        self.clients.append({"name": user, "current_action": None, "location": None})
 
     # Verify if the json file is complete
     def validate_arguments(self, data: dict) -> bool:
@@ -148,7 +148,7 @@ class Core:
                 if sender in discussion_group:
                     return discussion_group
         return None
-    
+
     # Get The current place group of the sender
     def get_current_place(self, sender: str) -> str:
         for place in self.places:
@@ -156,7 +156,7 @@ class Core:
                 if sender in discussion_group:
                     return place
         return None
-    
+
     # Get the current place's participans
     def get_current_place_participants(self, sender: str) -> str:
         people = []
@@ -176,19 +176,19 @@ class Core:
     def clean_useless_discussion_groups(self):
         for place in self.places:
             self.places[place] = [group for group in self.places[place] if group]
-    
+
     def get_new_description(self):
         if (len(self.descriptions) != 0):
             description = self.descriptions.pop(random.randint(0, len(self.descriptions) - 1))
         else:
             description = "Tobby:You'r a shy guy, you don't speak a lot"
         return tuple(description.split(":"))
-    
+
     def print_debug(self, *args, **kwargs):
         logging.debug(*args)
         if self.debug:
             print(*args, **kwargs)
-    
+
     def print_client_info(self, client, current_time):
         if client["current_action"] != None:
             print(f"{client['name']} | ", end="")
@@ -196,7 +196,7 @@ class Core:
             print(f" | time left: {client['current_action']['execution_time'] - current_time}")
         else:
             print(f"{client['name']} | do nothing")
-    
+
     def transfer_info(self):
         clients_data = [cp_dict(client_data) for client_data in self.clients]
         f = open("core_to_graphic_interface.txt", "a")
@@ -205,6 +205,11 @@ class Core:
                 del client["current_action"]["function"]
         f.write("|".join(map(str, clients_data))+"\n")
         f.close()
+
+    def remove_client(self, client_name):
+        for i in range(len(self.clients)):
+            if self.clients[i]["name"] == client_name:
+                del self.clients[i]
 
 
     # Sender go to an specific location
@@ -218,6 +223,7 @@ class Core:
                 if client["name"].lower() == data["sender"].lower():
                     self.remove_from_current_group(data["sender"])
                     client["current_action"] = {"name": "go to location", "execution_time": current_time + GO_TO_LOCATION_TIME, "data": data, "function": self.execute_go_to_location}
+                    client["location"] = "street"
             self.send_message_to_client(data["sender"], f"You start moving to {location}")
         else:
             self.send_message_to_client(data["sender"], DataConfig.INVALID_LOCATION)
@@ -227,6 +233,7 @@ class Core:
 
             if client["name"].lower() == data["sender"].lower():
                 client["current_action"] = None
+                client["location"] = data["location"]
         location = data.get("location").lower()
         self.places[location].append([data["sender"]])
         self.send_message_to_client(data["sender"], f"You moved successfully to {location}")
