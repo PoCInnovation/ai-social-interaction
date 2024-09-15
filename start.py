@@ -4,8 +4,12 @@ import signal
 import time
 import sys
 import os
+import json
 
-
+def get_config():
+    with open("config.json") as f:
+        config = json.load(f)
+    return (config['clientsNumber'], config['simulationDuration'])
 
 def signal_handler(sig, frame):
     os.system('pkill -f "python ./main client"')
@@ -31,13 +35,15 @@ except ValueError:
     exit(1)
 
 memory = Memory()
-memory.ask_question("test")
+memory.ask_question("hello")
+
+clientsNumber, simulationDuration = get_config()
 
 os.system("./main server &")
-for i in range(int(argv[1])):
+for i in range(int(clientsNumber)):
     os.system("./main client &")
 
-time.sleep(int(argv[2]))
+time.sleep(int(simulationDuration))
 
 os.system('pkill -f "python ./main client"')
 os.system('pkill -f "python ./main server"')
