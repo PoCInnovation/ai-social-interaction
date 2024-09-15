@@ -1,38 +1,23 @@
-=== COMMUNICATION PROTOCOL ===
-
-== JSON REQUEST FILE ==
-
+Template for the json request :
 {
-    "event": "",
+    "action": "",
     "sender": "",
     "receiver": "",
     "location": "",
-    "group_to_join: "",
+    "group_to_join": "",
     "message": "", 
-    "code": 0
 }
 
-== ATTRIBUTES ==
 
-    - Sender: (string) The name of the sender
+- Sender: (string) Your name
 
-    - Receiver: (string) The name of the receiver
+- Receiver: (string) The name of the receiver if needed
 
-    - Location: (string) Just a location
-        - Parc
-        - Street
-        - Work
-        - Restaurant
+- Location: (string) Just a location among those locations : [parc, street, work, restaurant]
 
-    - Group_to_join: (string) name of somebody whose group you want to join
+- Group_to_join: (string) only the name of somebody whose group you want to join if needed
 
-    - Message: (string) regular message if needed
+- Message: (string) regular message to someone in your current group if needed
 
-    - Code: (int) Exit code of the request
-
-    - Event: (string) 
-        - "go_to_location", needs "sender" and "location"
-        - "join_group" needs "sender" and "group_to_join"
-        - speak_in_group needs "sender" and "message"
-        - call_system needs code
-
+- action: (string) You have choice between theses all theses actions, Each action require specifics arguments so be sure to use the right ones
+    - "go_to_location", needs "sender" and "location" (a different location from the one you're at)
