@@ -3,9 +3,10 @@ import os
 import sys
 import random
 import logging
+from datetime import datetime
 
 logging.basicConfig(
-    filename="app.log",
+    filename=datetime.now().strftime("%m-%d-%Y_%H:%M")+".log",
     encoding="utf-8",
     filemode="w",
     format="{asctime} - {levelname} - {message}",
