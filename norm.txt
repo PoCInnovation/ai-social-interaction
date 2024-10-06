@@ -4,7 +4,7 @@
     "receiver": "",
     "location": "",
     "group_to_join": "",
-    "message": ""
+    "message": "",
 }
 
 Field Explanations

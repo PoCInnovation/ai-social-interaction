@@ -35,7 +35,7 @@ class Server:
 
         sockets_list = [server_socket]
         core = Core(debug=False)
-        
+
         print(f'Serveur démarré sur {DataConfig.SERVER_HOST}:{DataConfig.SERVER_PORT}')
 
         while True:
@@ -43,6 +43,7 @@ class Server:
             start_time = time.time()
             core.execute_finished_actions(current_time)
             core.ask_actions_to_do(client_socket_map)
+            core.transfer_info()
             while time.time() - start_time < 4:
 
                 read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list, 1)
@@ -61,6 +62,8 @@ class Server:
                         if message is False:
                             print(f'Connexion fermée depuis {client_socket_map[notified_socket]}')
                             sockets_list.remove(notified_socket)
+                            # core.remove_client()
+                            core.remove_client(client_socket_map[notified_socket])
                             del client_socket_map[notified_socket]
                             continue
                         client_name = client_socket_map[notified_socket]
