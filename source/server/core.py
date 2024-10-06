@@ -3,9 +3,10 @@ import os
 import sys
 import random
 import logging
+from datetime import datetime
 
 logging.basicConfig(
-    filename="app.log",
+    filename="./logs/" + datetime.now().strftime("%m-%d-%Y_%H:%M") + ".log",
     encoding="utf-8",
     filemode="w",
     format="{asctime} - {levelname} - {message}",
@@ -18,9 +19,6 @@ logging.info("program start")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import DataConfig
-from dotenv import load_dotenv
-
-load_dotenv()
 
 class Core:
     def __init__(self, debug = False) -> None:
