@@ -3,13 +3,10 @@ import sys
 import os
 import select
 from source.client.memory import Memory
-from dotenv import load_dotenv
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import DataConfig
-
-load_dotenv()
 
 class Client:
 
@@ -43,21 +40,10 @@ class Client:
                         action = memory.get_action(message.split("WHAT")[0])
                         print("action :\n" + action)
                         self.send_message(client_socket, action)
-                    if message.startswith("STARTING MESSAGE"):
+                    elif message.startswith("STARTING MESSAGE"):
                         message = message.split(":")
                         memory = Memory()
                         memory.create_memory(message[1], message[2])
                         memory.synthesizes_memory()
-                # else:
-                #     message = sys.stdin.readline().strip()
-                #     message = '''
-                #     {
-                #         "action": "go_to_location",
-                #         "sender": "pierre",
-                #         "receiver": "",
-                #         "location": "parc",
-                #         "group_to_join": "",
-                #         "message": "" 
-                #     }
-                #     '''
-                #     send_message(client_socket, message)
+                    else:
+                        memory.add_to_memory(message)

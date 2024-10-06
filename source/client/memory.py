@@ -9,12 +9,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+from openai import OpenAI
+
+
+
+
 class Memory:
     def __init__(self) -> None:
         self.action = ""
         self.memory = ""
         self.name = ""
-        self.client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+        self.client = OpenAI(api_key=os.environ.get("GROQ_API_KEY")) # Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
         self.context = "For a simulation of a village, you are a villager in a small town."
         with open(os.path.dirname(__file__) + "/../../norm.txt", "r") as norm_file:
@@ -22,25 +28,21 @@ class Memory:
 
     def ask_question(self, messages):
         completion = self.client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="gpt-4o-mini",
             messages=messages,
-            temperature=1,
-            max_tokens=2048,
-            top_p=1,
-            stream=True,
-            stop=None,
+            max_tokens=8048,
         )
-        res=""
-        for chunk in completion:
-            res += chunk.choices[0].delta.content or ""
-        return res
+        return completion.choices[0].message.content
+    
+    def ask_simple_question(self, message):
+        return self.ask_question([{"role": "user", "content": message}])
 
     # Create a memory string from a description
     def create_memory(self, name,  description):
         self.name = name
         messages = [
                 {"role": "system","content": self.context + ".Your name is " + self.name + description},
-                {"role": "user", "content": "From this description, create a memory text with 1000 words without anything else"}
+                {"role": "user", "content": "From this description, create a memory text with 300 words without anything else"}
             ]
         self.memory = self.ask_question(messages)
 
@@ -48,7 +50,7 @@ class Memory:
     def synthesizes_memory(self):
         messages = [
                 {"role": "system","content": self.context + ".Your name is " + self.name + self.memory},
-                {"role": "user", "content": "Synthesizes your memory with 1000 words without message"}
+                {"role": "user", "content": "Synthesizes your memory with 300 words without message"}
             ]
         self.memory = self.ask_question(messages)
 
@@ -76,8 +78,8 @@ class Memory:
     # Get an action in the json format of norm.txt
     def get_action(self, env_message):
         messages = [
-            {"role": "system","content": self.context + ".Your name is " + self.name + self.memory},
-            {"role": "system","content": env_message},
+            {"role": "system","content": self.context + ".Your name is " + self.name + " " + self.memory},
+            {"role": "system","content": "REMEMBER THIS:" + env_message},
             {"role": "user","content" : "Choose an action to do only answer with this json format :" + self.action_norm}
         ]
         action = self.ask_question(messages)

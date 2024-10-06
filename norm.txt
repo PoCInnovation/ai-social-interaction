@@ -1,4 +1,3 @@
-Template for the json request :
 {
     "action": "",
     "sender": "",
@@ -8,16 +7,47 @@ Template for the json request :
     "message": "",
 }
 
+Field Explanations
+sender: (string) Your name.
 
-- Sender: (string) Your name
+receiver: (string) The name of the receiver if needed.
 
-- Receiver: (string) The name of the receiver if needed
+location: (string) The location among these choices: "street", "restaurant".
 
-- Location: (string) Just a location among those locations : [parc, work, restaurant]
+group_to_join: (string) The name of someone whose group you want to join, if needed.
 
-- Group_to_join: (string) only the name of somebody whose group you want to join if needed
+message: (string) A regular message to someone in your current group, if needed.
 
-- Message: (string) regular message to someone in your current group if needed
+action: (string) The action to perform. Note that some actions can only be done under specific conditions:
 
-- action: (string) You have choice between theses all theses actions, Each action require specifics arguments so be sure to use the right ones
-    - "go_to_location", needs "sender" and "location" (a different location from the one you're at)
+"join_group": Requires "sender" and "group_to_join".
+"speak_in_group": Requires "sender" and "message". This action can only be performed if you are not alone in your discussion group.
+
+Example Usages
+Joining a Group
+To join a discussion group, you need to provide your name and the name of the person whose group you want to join.
+
+{
+    "action": "join_group",
+    "sender": "Alice",
+    "receiver": "",
+    "location": "",
+    "group_to_join": "Bob",
+    "message": ""
+}
+Speaking in a Group (only if you are not alone in your discussion group)
+To speak in a group, ensure that there are other members in the group before sending a message.
+
+{
+    "action": "speak_in_group",
+    "sender": "Alice",
+    "receiver": "",
+    "location": "",
+    "group_to_join": "",
+    "message": "Hello everyone!"
+}
+Validation Rules
+Joining a Group: This action can be performed if the required parameters ("sender" and "group_to_join") are provided.
+Speaking in a Group: Before allowing this action:
+    Verify that the sender is not alone in their discussion group.
+    If the sender is alone, do not process the "speak_in_group" action.
