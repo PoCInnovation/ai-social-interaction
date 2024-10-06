@@ -1,43 +1,41 @@
 import os
+from groq import Groq
 import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from config import DataConfig
+from dotenv import load_dotenv
 
-torch.random.manual_seed(0)
+load_dotenv()
+
+
+from openai import OpenAI
+
+
+
 
 class Memory:
     def __init__(self) -> None:
         self.action = ""
         self.memory = ""
         self.name = ""
+        self.client = OpenAI(api_key=os.environ.get("GROQ_API_KEY")) # Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
         self.context = "For a simulation of a village, you are a villager in a small town."
-        self.model = AutoModelForCausalLM.from_pretrained(
-            "microsoft/Phi-3.5-mini-instruct",
-        device_map="cuda",
-        torch_dtype="auto",
-        trust_remote_code=True
-        )
-        self.tokenizer = AutoTokenizer.from_pretrained("microsoft/Phi-3.5-mini-instruct")
-        self.pipe = pipeline(
-        "text-generation",
-        model=self.model,
-        tokenizer=self.tokenizer
-        )
-        self.generation_args = {
-        "max_new_tokens": 500,
-        "return_full_text": False,
-        "do_sample": False,
-        }
-        with open(os.path.dirname(__file__) + "/../../norm.txt", "r") as norm_file:    
+        with open(os.path.dirname(__file__) + "/../../norm.txt", "r") as norm_file:
             self.action_norm = norm_file.read()
 
-
     def ask_question(self, messages):
-      pass
+        completion = self.client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            max_tokens=8048,
+        )
+        return completion.choices[0].message.content
+    
+    def ask_simple_question(self, message):
+        return self.ask_question([{"role": "user", "content": message}])
 
     # Create a memory string from a description
     def create_memory(self, name,  description):
