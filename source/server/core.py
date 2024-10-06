@@ -27,12 +27,12 @@ class Core:
         self.clients = []
         self.client_socket_map = {}
         self.places = {
-            "parc": [],
+            #"parc": [],
             "street": [],
-            "work": [],
+            #"work": [],
             "restaurant": [],
-            "market": [],
-            "school": []
+            #"market": [],
+            #"school": []
         }
         with open(os.path.dirname(__file__) + "/descriptions.txt", "r") as description_file:    
             self.descriptions = description_file.read().split("\n")
@@ -77,15 +77,35 @@ class Core:
     def send_message_to_client(self, target_client_name, message):
         self.print_debug(f"Envoi a {target_client_name}: {message}")
         place = self.get_current_place(target_client_name)
+
         group_participants = ""
         place_participants = ""
 
-        if ((self.get_current_discussion_group(target_client_name))):
-            group_participants = ", ".join(self.get_current_discussion_group(target_client_name))
-        if ((self.get_current_place_participants(target_client_name))):
-            place_participants = ", ".join(self.get_current_place_participants(target_client_name))
+        if (self.get_current_discussion_group(target_client_name)) != None:
+            for group_participant in self.get_current_discussion_group(target_client_name):
+                if (group_participant != target_client_name):
+                    group_participants += group_participant + ", "
 
-        message = f"You are in the {place} with {place_participants} Your current chat groupe is with {group_participants}\n{message}" # it's {self.current_time} time\n{message}"
+        if (self.get_current_place_participants(target_client_name)) != None:
+            for place_participant in self.get_current_place_participants(target_client_name):
+                if (place_participant != target_client_name):
+                    place_participants += place_participant + ", "
+        
+        if group_participants == "":
+            group_participants = "Nobody"
+        if (place_participants) == "":
+            place_participants = "Nobody"
+
+        if (place == None):
+            return
+
+        rm = message
+        message = f"You are in the {place} the persons in your current zone are {place_participants} " # it's {self.current_time} time\n{message}"
+
+        if group_participants != "Nobody":
+            message = f"{message}but your current discussion groupe is composed of {group_participants}\n{rm}"
+        else:
+            message = f"{message}but you are currently alone in your discussion group\n{rm}"
 
         for client_socket, client_name in self.client_socket_map.items():
             if str(client_name).lower() == str(target_client_name).lower():
@@ -116,8 +136,8 @@ class Core:
                 self.send_message_to_client(client["name"], "WHAT ACTION DO YOU WANT TO DO ?")
 
     def add_new_user(self, user):
-        self.places["street"].append([user])
-        self.clients.append({"name": user, "current_action": None})
+        self.places["street"].append([user.lower()])
+        self.clients.append({"name": user.lower(), "current_action": None})
 
     # Verify if the json file is complete
     def validate_arguments(self, data: dict) -> bool:
@@ -153,7 +173,7 @@ class Core:
             for discussion_group in self.places[place]:
                 for entity in discussion_group:
                     people.append(entity)
-        return []
+        return people
 
     # Remove Sender From his current discussion group
     def remove_from_current_group(self, sender: str):
@@ -195,19 +215,21 @@ class Core:
         GO_TO_LOCATION_TIME = 2
 
         location = data.get("location").lower()
+        data["sender"] = data["sender"].lower()
+    
         if location in self.places:
             for client in self.clients:
                 if client["name"].lower() == data["sender"].lower():
                     self.remove_from_current_group(data["sender"])
-                    client["current_action"] = {"name": "go to location", "execution_time": current_time + GO_TO_LOCATION_TIME, "data": data, "function": self.execute_go_to_location}
+                    client["current_action"] = {"name": "go_to_location", "execution_time": current_time + GO_TO_LOCATION_TIME, "data": data, "function": self.execute_go_to_location}
             self.send_message_to_client(data["sender"], f"You start moving to {location}")
         else:
             self.send_message_to_client(data["sender"], DataConfig.INVALID_LOCATION)
 
     def execute_go_to_location(self, data):
-        for client in self.clients:
 
-            if client["name"].lower() == data["sender"].lower():
+        for client in self.clients:
+            if client["name"].lower() == data["sender"]:
                 client["current_action"] = None
         location = data.get("location").lower()
         self.places[location].append([data["sender"]])
@@ -215,12 +237,33 @@ class Core:
 
 
 
+
     # Sender join an specific discussion group
     def join_group(self, data: dict, current_time: int):
+
+        JOIN_GROUP_TIME = 1
+
+        data["sender"] = data["sender"].lower()
+        data["group_to_join"] = data["group_to_join"].lower()
+
+        print(self.places)
+
         for place in self.places:
             for discussion_group in self.places[place]:
                 if data["group_to_join"] in discussion_group:
-                    self.remove_from_current_group(data["sender"])
+                    for client in self.clients:
+                        if client["name"].lower() == data["sender"]:
+                            self.remove_from_current_group(data["sender"])
+                            client["current_action"] = {"name": "join_group", "execution_time": current_time + JOIN_GROUP_TIME, "data": data, "function": self.execute_join_group}
+                            self.send_message_to_client(data["sender"], f"You start moving to {data['group_to_join']}'s discussion group")
+                            return        
+        self.send_message_to_client(data["sender"], DataConfig.INVALID_DISCUSSION_GROUP)
+
+    # Execute Join discussion group
+    def execute_join_group(self, data: dict):
+        for place in self.places:
+            for discussion_group in self.places[place]:
+                if data["group_to_join"] in discussion_group:
                     discussion_group.append(data["sender"])
                     for neighbor in discussion_group:
                         self.send_message_to_client(neighbor, f"{data['sender']} joined your discussion group")
@@ -229,13 +272,28 @@ class Core:
         self.send_message_to_client(data["sender"], DataConfig.INVALID_DISCUSSION_GROUP)
 
 
-
-
     # Sender speak in his current discussion group
     def speak_in_group(self, data: dict, current_time: int):
+
+        SPEAK_IN_GROUP_TIME = 1
+
+        data["sender"] = data["sender"].lower()
+
+        for client in self.clients:
+            if client["name"].lower() == data["sender"]:
+                client["current_action"] = {"name": "speak_in_group", "execution_time": current_time + SPEAK_IN_GROUP_TIME, "data": data, "function": self.execute_speak_in_group}
+
+
+
+    def execute_speak_in_group(self, data: dict):
         discussion_group = self.get_current_discussion_group(data["sender"])
         if discussion_group is None:
             self.send_message_to_client(data["sender"], DataConfig.INVALID_DISCUSSION_GROUP)
             return
+        print(f"--------------------{len(discussion_group)}------------------")
+        if len(discussion_group) == 1:
+            self.send_message_to_client(data["sender"], DataConfig.NO_CURRENT_DISCUSSION_GROUP)
+            return
         for neighbor in discussion_group:
-            self.send_message_to_client(neighbor, f"{data['sender']} said: '{data['message']}'")
+            if neighbor != data["sender"]:
+                self.send_message_to_client(neighbor, f"{data['sender']} said: '{data['message']}'")

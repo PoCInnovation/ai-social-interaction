@@ -12,3 +12,4 @@ class DataConfig:
     ERROR_MESSAGE = "There is one or multiple errors in the message you sent"
     ZONE_ERROR = "There is an error with your current zone"
     PERSON_ERROR = "The person you are trying to talk to does not exist or is currently not in your zone"
+    NO_CURRENT_DISCUSSION_GROUP = "You are actually alone in your discussion group"

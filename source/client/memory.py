@@ -37,15 +37,14 @@ class Memory:
 
 
     def ask_question(self, messages):
-        output = self.pipe(messages, **self.generation_args)
-        return output[0]['generated_text']
+      pass
 
     # Create a memory string from a description
     def create_memory(self, name,  description):
         self.name = name
         messages = [
                 {"role": "system","content": self.context + ".Your name is " + self.name + description},
-                {"role": "user", "content": "From this description, create a memory text with 1000 words without anything else"}
+                {"role": "user", "content": "From this description, create a memory text with 300 words without anything else"}
             ]
         self.memory = self.ask_question(messages)
 
@@ -53,7 +52,7 @@ class Memory:
     def synthesizes_memory(self):
         messages = [
                 {"role": "system","content": self.context + ".Your name is " + self.name + self.memory},
-                {"role": "user", "content": "Synthesizes your memory with 1000 words without message"}
+                {"role": "user", "content": "Synthesizes your memory with 300 words without message"}
             ]
         self.memory = self.ask_question(messages)
 
@@ -81,8 +80,8 @@ class Memory:
     # Get an action in the json format of norm.txt
     def get_action(self, env_message):
         messages = [
-            {"role": "system","content": self.context + ".Your name is " + self.name + self.memory},
-            {"role": "system","content": env_message},
+            {"role": "system","content": self.context + ".Your name is " + self.name + " " + self.memory},
+            {"role": "system","content": "REMEMBER THIS:" + env_message},
             {"role": "user","content" : "Choose an action to do only answer with this json format :" + self.action_norm}
         ]
         action = self.ask_question(messages)
